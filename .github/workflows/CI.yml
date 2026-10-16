@@ -38,5 +38,3 @@ jobs:
         run: |
           cmake --install build --prefix install
           ./install/bin/greet Alice
-
-
