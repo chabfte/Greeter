@@ -13,6 +13,7 @@ on:
 # Le GITHUB_TOKEN (fourni automatiquement) doit pouvoir creer une Release
 permissions:
   contents: write
+  packages: write
 
 jobs:
   # ==========================================================================
@@ -37,3 +38,24 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: build/*.tar.gz
+
+docker:
+  name: CD - Image Docker
+  runs-on: ubuntu-latest
+  steps:
+    - name: Recuperer le code
+      uses: actions/checkout@v4
+
+    - name: Se connecter au registre ghcr.io
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Construire et publier l'image
+      run: |
+        # le nom de l'image doit etre en minuscules : ${VAR,,}
+        IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_REF_NAME}
+        docker build -t $IMAGE .
+        docker push $IMAGE
